@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   # see issue #152
-os.environ["CUDA_VISIBLE_DEVICES"]="0,1"
+os.environ["CUDA_VISIBLE_DEVICES"]=""
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior() 
 from configobj import ConfigObj
@@ -130,7 +130,7 @@ if __name__ == '__main__':
         devices = ops.get_available_gpus()
         dic = {}
 
-        with tf.variable_scope('Generator'), tf.device('/gpu:0'):
+        with tf.variable_scope('Generator'), tf.device('/cpu:0'):
             tf_output = build_tower(tf.expand_dims(input_, axis=0))
 
         with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
