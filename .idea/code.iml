@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="PYTHON_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/stage2_20220615_G&amp;RSeperateTrain_initIter=0" />
+      <excludeFolder url="file://$MODULE_DIR$/stage2_20220716_G&amp;RSeperateTrain_initIter=0" />
+      <excludeFolder url="file://$MODULE_DIR$/stage2_20220724_G&amp;RSeperateTrain_initIter=0" />
+      <excludeFolder url="file://$MODULE_DIR$/stage2_20220727_G&amp;RSeperateTrain_initIter=0" />
+      <excludeFolder url="file://$MODULE_DIR$/stage2_20220903_G&amp;RSeperateTrain_initIter=0" />
+    </content>
+    <orderEntry type="jdk" jdkName="tf2_env" jdkType="Python SDK" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+  <component name="PyDocumentationSettings">
+    <option name="format" value="GOOGLE" />
+    <option name="myDocStringFormat" value="Google" />
+  </component>
+</module>
