@@ -185,7 +185,7 @@ if __name__ == '__main__':
                 for experiment in experiments:
                     x_norm = np.copy(x)
                     if experiment == 'z_score':
-                        x = (x - np.mean(x)) / (np.std(x) + 1e-8)
+                        x_norm = (x - np.mean(x)) / (np.std(x) + 1e-8)
                     elif experiment == 'min_max':
                         img_min = np.min(x_norm)
                         img_max = np.max(x_norm)
