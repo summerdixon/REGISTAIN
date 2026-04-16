@@ -135,7 +135,7 @@ if __name__ == '__main__':
             tf_output = build_tower(tf.expand_dims(input_, axis=0))
 
         with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-            tf.train.Saver().restore(sess, '../Weights/42000')
+            tf.train.Saver().restore(sess, '../../../Weights/model/42000')
             # os.system('rm -r outputs_HE')
             # os.system('mkdir outputs_HE')
             means = []
