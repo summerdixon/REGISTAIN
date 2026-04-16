@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   # see issue #152
-os.environ["CUDA_VISIBLE_DEVICES"]=""
+os.environ["CUDA_VISIBLE_DEVICES"]="0,1"
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior() 
 from configobj import ConfigObj
@@ -120,32 +120,38 @@ def build_tower(inp):
 
 if __name__ == '__main__':
 
-    with tf.Graph().as_default(), tf.device('/cpu:0'):
+    with tf.Graph().as_default(), tf.device('/gpu:0'):
 
         #images = glob.glob('G:/Transplant/reg_network_code/second_TileReg/target/*.npy')
         #images = glob.glob('F:/Transplant-lung/First_reg_crop/SP20-917-001/input_pro/*.npy')
-        images = glob.glob('F:/Tairan/Batch2_Lung_HE_dataset/Third_reg_crop_nobleach/Testing/SP18-29-001/input/*.mat')
+        #images = glob.glob('F:/Tairan/Batch2_Lung_HE_dataset/Third_reg_crop_nobleach/Testing/SP18-29-001/input/*.mat')
+        images = glob.glob('G:/Project_Nectrotic/Data/ProcessingData/RegistrationRound2_crops/NPY/NonNecrotic/sample4B/AF/*.npy')
         print(images)
         input_ = tf.placeholder(tf.float32, shape=[2048, 2048, 4])
         devices = ops.get_available_gpus()
         dic = {}
 
-        with tf.variable_scope('Generator'), tf.device('/cpu:0'):
+        with tf.variable_scope('Generator'), tf.device('/gpu:0'):
             tf_output = build_tower(tf.expand_dims(input_, axis=0))
 
         with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-            tf.train.Saver().restore(sess, 'model/42000')
+            tf.train.Saver().restore(sess, '../Weights/42000')
             # os.system('rm -r outputs_HE')
             # os.system('mkdir outputs_HE')
             means = []
             for i in tqdm(range(len(images))):
                # path=images[i].replace('.npy','.mat')
                # path = 'outputs/{}'.format(images[i].split('\\')[-1].split('.')[0])
-                if os.path.exists(os.path.dirname(images[i]).replace('input','output')) == False:
-                    os.mkdir(os.path.dirname(images[i]).replace('input','output'))
+                af_path = images[i]
+                bf_path = af_path.replace('AF', 'BF').replace('af', 'bf')
+                # if os.path.exists(os.path.dirname(images[i]).replace('input','output')) == False:
+                #     os.mkdir(os.path.dirname(images[i]).replace('input','output'))
                 #if os.path.exists(os.path.dirname(images[i]).replace('target','output_round3_he+dapi/iter34000')) == False:
                 #    os.mkdir(os.path.dirname(images[i]).replace('target','output_round3_he+dapi/iter34000'))
-                savepath = (images[i].replace('input', 'output')).replace('npy','mat')
+                # savepath = (images[i].replace('input', 'output')).replace('npy','mat')
+                save_dir = 'C:/Users/76/summer_necrosis_project/Necrotic_Outputs/'
+                if not os.path.exists(save_dir): os.makedirs(save_dir)
+                savepath = os.path.join(save_dir, os.path.basename(af_path).replace('.npy', '.tif'))
                 # savepath_target = (images[i].replace('target', 'output_dapi+txred_v1_33000')).replace('npy','target_mat')
                 #x = np.load(images[i].replace('target', 'output_DAPI+TxRed_r2'))
                 #x = np.dstack((np.load(images[i].replace('target', 'input'))[:,:,0],np.load(images[i].replace('target', 'input'))[:,:,1]))
@@ -154,21 +160,29 @@ if __name__ == '__main__':
                 #x = np.load(images[i].replace('target_aligned_r1', 'input_reg'))[:,:,0]
                 #x = np.array(x, dtype = np.float32)
                 #x = np.expand_dims(x,-1)
-                image_af = scipy.io.loadmat(images[i].replace('input', 'input'))
-                image_af = np.array(image_af['input'], dtype = np.float32)
-                x = image_af[:,:,[0,1,2,3]]
+                img_af = np.load(af_path).astype(np.float32)[..., 0]
+                img_bf = np.load(bf_path).astype(np.float32)[..., 0]
+                x = np.zeros((2048, 2048, 4), dtype=np.float32)
 
-                image_temp =  (x.copy())
+                h_af, w_af = min(img_af.shape[0], 2048), min(img_af.shape[1], 2048)
+                h_bf, w_bf = min(img_bf.shape[0], 2048), min(img_bf.shape[1], 2048)
+
+                x[0:h_bf, 0:w_bf, 0] = img_bf[0:h_bf, 0:w_bf]
+                x[0:h_af, 0:w_af, 3] = img_af[0:h_af, 0:w_af]
+
+                x = (x - np.mean(x)) / (np.std(x) + 1e-8)
+
+                # image_temp =  (x.copy())
                 # for j in range(4):
-                x[:,:] = (image_temp[:,:] - np.mean(image_temp[:,:]))/(np.std(image_temp[:,:]))
+                # x[:,:] = (image_temp[:,:] - np.mean(image_temp[:,:]))/(np.std(image_temp[:,:]))
                 # xx=np.rot90(x,0)
                 # x = x/65535 * 2 - 1
                 xx=x
 
                 #y = (np.load(images[i]))#[50:-50,50:-50]#[75:-75,75:-75]#[:1224,:1224]
-               # y = np.load(images[i].replace('input', 'target'))[:1024,:1024,:]
-                label = scipy.io.loadmat(images[i])
-                y = np.array(label['input'], dtype = np.float32)
+                #y = np.load(images[i].replace('input', 'target'))[:1024,:1024,:]
+                #label = scipy.io.loadmat(images[i])
+                #y = np.array(label['input'], dtype = np.float32)
 
                 z = sess.run(tf_output, feed_dict={input_: xx})
                 z = np.squeeze(z)
@@ -178,7 +192,7 @@ if __name__ == '__main__':
                 z[:,:,2] = z_temp[:,:,0] + 1.773* (z_temp[:,:,2] - 128)
                 z[z>255]=255
 
-                label=y#[:1024-32,:1024-32]
+                #label=y#[:1024-32,:1024-32]
                 # z=np.rot90(z,0)
                 # label_temp = label.copy()
                 # label[:,:,0] = 0.299*label_temp[:,:,0]+0.587*label_temp[:,:,1]+0.114*label_temp[:,:,2]
@@ -187,7 +201,7 @@ if __name__ == '__main__':
 
                 # scipy.io.savemat(path+'.mat', {'output': z, 'target':label, 'input':xx})
                 # scipy.io.savemat(savepath, {'output':z, 'target':label})
-                label = label * 255
+                # label = label * 255
 
                 # im_target = Image.fromarray(label.astype(np.uint8))
                 # im_target.save(savepath+'target.tif')
