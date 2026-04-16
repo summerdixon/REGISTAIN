@@ -170,14 +170,33 @@ if __name__ == '__main__':
                 x[0:h_bf, 0:w_bf, 0] = img_bf[0:h_bf, 0:w_bf]
                 x[0:h_af, 0:w_af, 3] = img_af[0:h_af, 0:w_af]
 
-                x = (x - np.mean(x)) / (np.std(x) + 1e-8)
-
                 # image_temp =  (x.copy())
                 # for j in range(4):
                 # x[:,:] = (image_temp[:,:] - np.mean(image_temp[:,:]))/(np.std(image_temp[:,:]))
                 # xx=np.rot90(x,0)
                 # x = x/65535 * 2 - 1
-                xx=x
+                #xx=x
+
+
+                # START OF SUMMER NEW CODE
+                # -----------------------------------------------
+                experiments = ['z_score', 'min_max', '99_clip']
+
+                for experiment in experiments:
+                    x_norm = np.copy(x)
+                    if experiment == 'z_score':
+                        x = (x - np.mean(x)) / (np.std(x) + 1e-8)
+                    elif experiment == 'min_max':
+                        x_norm = (x_norm / 65535.0) * 2.0 - 1.0
+                    elif experiment == '99_clip':
+                        p99_bf = np.percentile(img_bf, 99)
+                        p99_af = np.percentile(img_af, 99)
+                        x_norm[:, :, 0] = np.clip(x_norm[:, :, 0], 0, p99_bf)
+                        x_norm[:, :, 3] = np.clip(x_norm[:, :, 3], 0, p99_af)
+                        x_norm = (x_norm - np.mean(x_norm)) / (np.std(x_norm) + 1e-8)
+
+                # -----------------------------------------------
+
 
                 #y = (np.load(images[i]))#[50:-50,50:-50]#[75:-75,75:-75]#[:1224,:1224]
                 #y = np.load(images[i].replace('input', 'target'))[:1024,:1024,:]
