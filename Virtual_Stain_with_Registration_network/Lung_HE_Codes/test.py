@@ -187,7 +187,9 @@ if __name__ == '__main__':
                     if experiment == 'z_score':
                         x = (x - np.mean(x)) / (np.std(x) + 1e-8)
                     elif experiment == 'min_max':
-                        x_norm = (x_norm / 65535.0) * 2.0 - 1.0
+                        img_min = np.min(x_norm)
+                        img_max = np.max(x_norm)
+                        x_norm = 2.0 * (x_norm - img_min) / (img_max - img_min + 1e-8) - 1.0
                     elif experiment == '99_clip':
                         p99_bf = np.percentile(img_bf, 99)
                         p99_af = np.percentile(img_af, 99)
