@@ -195,6 +195,21 @@ if __name__ == '__main__':
                         x_norm[:, :, 3] = np.clip(x_norm[:, :, 3], 0, p99_af)
                         x_norm = (x_norm - np.mean(x_norm)) / (np.std(x_norm) + 1e-8)
 
+                    z = sess.run(tf_output, feed_dict={input_: x_norm})
+                    z = np.squeeze(z)
+                    z_temp = z.copy()
+                    z[:,:,0] = z_temp[:,:,0] + 1.403* (z_temp[:,:,1] - 128)
+                    z[:,:,1] = z_temp[:,:,0] - 0.714* (z_temp[:,:,1] - 128) - 0.344*(z_temp[:,:,2] - 128)
+                    z[:,:,2] = z_temp[:,:,0] + 1.773* (z_temp[:,:,2] - 128)
+                    z[z>255]=255
+
+                    experiment_dir = os.path.join(save_dir, experiment)
+                    if not os.path.exists(experiment_dir): os.makedirs(experiment_dir)
+                        
+                    savepath_experiment = os.path.join(experiment_dir, os.path.basename(af_path).replace('.npy', '.tif'))
+                    im = Image.fromarray(z.astype(np.uint8))
+                    im.save(savepath_experiment)
+
                 # -----------------------------------------------
 
 
@@ -203,13 +218,13 @@ if __name__ == '__main__':
                 #label = scipy.io.loadmat(images[i])
                 #y = np.array(label['input'], dtype = np.float32)
 
-                z = sess.run(tf_output, feed_dict={input_: xx})
-                z = np.squeeze(z)
-                z_temp = z.copy()
-                z[:,:,0] = z_temp[:,:,0] + 1.403* (z_temp[:,:,1] - 128)
-                z[:,:,1] = z_temp[:,:,0] - 0.714* (z_temp[:,:,1] - 128) - 0.344*(z_temp[:,:,2] - 128)
-                z[:,:,2] = z_temp[:,:,0] + 1.773* (z_temp[:,:,2] - 128)
-                z[z>255]=255
+                # z = sess.run(tf_output, feed_dict={input_: xx})
+                # z = np.squeeze(z)
+                # z_temp = z.copy()
+                # z[:,:,0] = z_temp[:,:,0] + 1.403* (z_temp[:,:,1] - 128)
+                # z[:,:,1] = z_temp[:,:,0] - 0.714* (z_temp[:,:,1] - 128) - 0.344*(z_temp[:,:,2] - 128)
+                # z[:,:,2] = z_temp[:,:,0] + 1.773* (z_temp[:,:,2] - 128)
+                # z[z>255]=255
 
                 #label=y#[:1024-32,:1024-32]
                 # z=np.rot90(z,0)
@@ -224,6 +239,6 @@ if __name__ == '__main__':
 
                 # im_target = Image.fromarray(label.astype(np.uint8))
                 # im_target.save(savepath+'target.tif')
-                im = Image.fromarray(z.astype(np.uint8))
-                im.save(savepath+'.tif')
+                # im = Image.fromarray(z.astype(np.uint8))
+                # im.save(savepath+'.tif')
                 #scipy.io.savemat(savepath, {'output': z})
