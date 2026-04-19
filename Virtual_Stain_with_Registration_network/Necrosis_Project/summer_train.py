@@ -41,7 +41,7 @@ def init_parameters():
                 and (tc.G_warmstart_checkpoint or tc.D_warmstart_checkpoint or tc.R_warmstart_checkpoint))
 
     tc.image_path_1 = 'G:/Project_Nectrotic/Data/ProcessingData/RegistrationRound2_crops/NPY/NonNecrotic/BF/*.npy'
-    vc.image_path_1 = '' #'G:/Pneumonia_Dataset/Second_reg/Testing/AAW*/target/*.mat'
+    vc.image_path_1 = 'G:/Project_Nectrotic/Data/ProcessingData/RegistrationRound2_crops/NPY/NonNecrotic/BF/*.npy' #'G:/Pneumonia_Dataset/Second_reg/Testing/AAW*/target/*.mat'
     tc.image_path_2 = '' #'I:/Pneumonia_Dataset/Second_reg/Training/AAW*/target/*.mat'
     vc.image_path_2 = '' #'I:/Pneumonia_Dataset/Second_reg/Testing/AAW*/target/*.mat'
 
